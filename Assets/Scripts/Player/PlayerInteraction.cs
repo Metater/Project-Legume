@@ -40,13 +40,13 @@ public class PlayerInteraction : PlayerComponent
                     CmdLeftMouseButtonDown(interactable, interactionDistance, interactionPointOffset);
                 }
 
-                manager.Get<CrosshairManager>().SetColor(targetGameObject.Interactable.GetCrosshairHoverColor());
+                manager.Get<CrosshairManager>().SetColor(targetGameObject.Interactable.CrosshairHoverColor);
             }
         }
 
         if (targetGameObject != null)
         {
-            manager.Get<CrosshairManager>().SetColor(targetGameObject.Interactable.GetCrosshairInteractingColor());
+            manager.Get<CrosshairManager>().SetColor(targetGameObject.Interactable.CrosshairInteractingColor);
         }
     }
 
@@ -55,7 +55,6 @@ public class PlayerInteraction : PlayerComponent
     {
         interactable.GetComponent<Interactable>().ServerLeftMouseButtonDown(player, interactionDistance, interactionPointOffset);
     }
-
     [Command]
     public void CmdLeftMouseButtonUp(NetworkIdentity interactable)
     {

@@ -6,7 +6,7 @@ using UnityEngine;
 public class DoorInteractable : Interactable
 {
     [SerializeField] private float angleSmoothTime;
-    private (Player player, float interactionDistance, Vector3 localInteractionPoint)? interactor = null;
+    private (Player player, float interactionDistance, Vector3 interactionPointOffset)? interactor = null;
     private float angleVelocity = 0;
 
     protected override void InteractableUpdate()
@@ -18,15 +18,16 @@ public class DoorInteractable : Interactable
 
         if (interactor != null)
         {
-            (Player player, float interactionDistance, Vector3 localInteractionPoint) = interactor.Value;
+            (Player player, float interactionDistance, Vector3 interactionPointOffset) = interactor.Value;
+
             if (player == null)
             {
                 interactor = null;
             }
             else
             {
-                Vector3 interactionPoint = GetPlayerInteractionPoint(player, interactionDistance, localInteractionPoint);
-                if (!IsInteractionPointWithinRadius(interactionPoint))
+                Vector3 interactionPoint = GetPlayerInteractionPoint(player, interactionDistance, interactionPointOffset);
+                if (!IsInteractionPointWithinBounds(interactionPoint))
                 {
                     interactor = null;
 
@@ -36,7 +37,8 @@ public class DoorInteractable : Interactable
                 {
                     Vector3 vector = transform.position - interactionPoint;
                     float angle = Vector2.SignedAngle(Vector2.up, new Vector2(vector.x, -vector.z)) - 90f;
-                    angle = Mathf.SmoothDampAngle(transform.localEulerAngles.y, angle, ref angleVelocity, angleSmoothTime);
+                    float currentAngle = transform.localEulerAngles.y;
+                    angle = Mathf.SmoothDampAngle(currentAngle, angle, ref angleVelocity, angleSmoothTime);
                     transform.localEulerAngles = new Vector3(0, angle, 0);
                 }
             }
@@ -44,11 +46,10 @@ public class DoorInteractable : Interactable
     }
 
     [Server]
-    public override void ServerLeftMouseButtonDown(Player player, float interactionDistance, Vector3 localInteractionPoint)
+    public override void ServerLeftMouseButtonDown(Player player, float interactionDistance, Vector3 interactionPointOffset)
     {
-        interactor ??= (player, interactionDistance, localInteractionPoint);
+        interactor ??= (player, interactionDistance, interactionPointOffset);
     }
-
     [Server]
     public override void ServerLeftMouseButtonUp(Player player)
     {

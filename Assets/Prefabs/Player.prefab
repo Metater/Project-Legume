@@ -391,7 +391,7 @@ MonoBehaviour:
   syncInterval: 0
   target: {fileID: 6694457422098715785}
   clientAuthority: 0
-  syncPosition: 1
+  syncPosition: 0
   syncRotation: 1
   syncScale: 0
   interpolatePosition: 1

@@ -5,7 +5,6 @@ using UnityEngine;
 public class CameraManager : Manager
 {
     [SerializeField] private Transform generalTransform;
-    [SerializeField] private float yOffset = 1.6f;
 
     public override void ManagerAwake()
     {
@@ -13,6 +12,7 @@ public class CameraManager : Manager
         {
             // Position own camera
             Camera.main.transform.SetParent(player.transform);
+            float yOffset = player.Get<PlayerMovement>().HandsTransform.localPosition.y;
             Camera.main.transform.localPosition = new Vector3(0, yOffset, 0);
         };
 

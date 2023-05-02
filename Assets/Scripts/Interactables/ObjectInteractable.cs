@@ -8,7 +8,7 @@ public class ObjectInteractable : Interactable
     [SerializeField] private Rigidbody rb;
     [SerializeField] private float forceProportionalConstant;
     [SerializeField] private float forceDerivitiveConstant;
-    private (Player player, float interactionDistance, Vector3 localInteractionPoint)? interactor = null;
+    private (Player player, float interactionDistance, Vector3 interactionPointOffset)? interactor = null;
     private float lastError = float.NaN;
 
     protected override void InteractableUpdate()
@@ -22,7 +22,8 @@ public class ObjectInteractable : Interactable
 
         if (interactor != null)
         {
-            (Player player, float interactionDistance, Vector3 localInteractionPoint) = interactor.Value;
+            (Player player, float interactionDistance, Vector3 interactionPointOffset) = interactor.Value;
+
             if (player == null)
             {
                 interactor = null;
@@ -30,8 +31,8 @@ public class ObjectInteractable : Interactable
             }
             else
             {
-                Vector3 interactionPoint = GetPlayerInteractionPoint(player, interactionDistance, localInteractionPoint);
-                if (!IsInteractionPointWithinRadius(interactionPoint))
+                Vector3 interactionPoint = GetPlayerInteractionPoint(player, interactionDistance, interactionPointOffset);
+                if (!IsInteractionPointWithinBounds(interactionPoint))
                 {
                     interactor = null;
 
@@ -54,11 +55,10 @@ public class ObjectInteractable : Interactable
     }
 
     [Server]
-    public override void ServerLeftMouseButtonDown(Player player, float interactionDistance, Vector3 localInteractionPoint)
+    public override void ServerLeftMouseButtonDown(Player player, float interactionDistance, Vector3 interactionPointOffset)
     {
-        interactor ??= (player, interactionDistance, localInteractionPoint);
+        interactor ??= (player, interactionDistance, interactionPointOffset);
     }
-
     [Server]
     public override void ServerLeftMouseButtonUp(Player player)
     {

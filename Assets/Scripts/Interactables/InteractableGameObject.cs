@@ -5,6 +5,5 @@ using UnityEngine;
 public class InteractableGameObject : MonoBehaviour
 {
     [SerializeField] private Interactable parent;
-
     public Interactable Interactable => parent;
 }

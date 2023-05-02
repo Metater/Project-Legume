@@ -9,8 +9,6 @@ public class CrosshairManager : Manager
     [SerializeField] private Color defaultColor = new(1, 1, 1, 0.5f);
     private Color? color = null;
 
-    // [SerializeField] private Color defaultItemColor = new(0.2039216f, 0.5647059f, 0.8117647f, 0.4980392f);
-
     public override void ManagerLateUpdate()
     {
         if (color == null)
