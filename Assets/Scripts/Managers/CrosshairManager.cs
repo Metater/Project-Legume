@@ -23,13 +23,13 @@ public class CrosshairManager : Manager
         color = null;
     }
 
-    public void SetColor(Color color)
-    {
-        this.color = color;
-    }
-
     public void SetVisibility(bool visible)
     {
         image.gameObject.SetActive(visible);
+    }
+
+    public void SetColor(Color color)
+    {
+        this.color = color;
     }
 }

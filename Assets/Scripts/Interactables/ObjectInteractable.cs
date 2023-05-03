@@ -35,6 +35,7 @@ public class ObjectInteractable : Interactable
                 if (!IsInteractionPointWithinBounds(interactionPoint))
                 {
                     interactor = null;
+                    lastError = float.NaN;
 
                     player.Get<PlayerInteraction>().RpcCancelInteraction(netIdentity);
                 }
@@ -65,6 +66,7 @@ public class ObjectInteractable : Interactable
         if (interactor != null && player == interactor.Value.player)
         {
             interactor = null;
+            lastError = float.NaN;
         }
     }
 }

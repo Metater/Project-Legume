@@ -1,0 +1,18 @@
+constants: public, protected, and private
+[SerializeField] Unity references: private and protected
+Awake-initialized references: private and protected, ie: GameManager
+readonly variables: private and protected
+variables: private and protected
+
+properties: public
+
+events: public
+
+Unity events: normal or wrapped, ie: Start, ManagerStart
+Mirror callbacks, ie: OnStartClient
+private methods
+protected methods: virtual, abstract, and normal
+public methods: virtual, abstract, and normal
+public Mirror: Commands, Rpcs, and TargetRpcs
+public Server methods
+static methods: public, protected, and private

@@ -73,7 +73,7 @@ public class PlayerMovement : PlayerComponent
         Vector3 moveDelta = moveVelocity * Time.deltaTime;
         controller.Move(moveDelta);
 
-        // If was grounded last update and isnt grounded now and falling down, cancel velocity
+        // If was grounded last update and isn't grounded now and falling down, cancel velocity
         if (controllerWasGrounded && !controller.isGrounded && moveVelocity.y < 0)
             moveVelocity.y = 0;
 
