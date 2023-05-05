@@ -14,7 +14,6 @@ namespace Mirror
         [Tooltip("When true, changes are not sent unless greater than sensitivity values below.")]
         public bool onlySyncOnChange = true;
 
-        uint sendIntervalCounter = 0;
         double lastSendIntervalTime = double.MinValue;
 
         // 3 was original, but testing under really bad network conditions, 2%-5% packet loss and 250-1200ms ping, 5 proved to eliminate any twitching.
@@ -62,17 +61,6 @@ namespace Mirror
             else if (isClient && IsClientWithAuthority) UpdateClientBroadcast();
         }
 
-        protected virtual void CheckLastSendTime()
-        {
-            // timeAsDouble not available in older Unity versions.
-            if (AccurateInterval.Elapsed(NetworkTime.localTime, NetworkServer.sendInterval, ref lastSendIntervalTime))
-            {
-                if (sendIntervalCounter == sendIntervalMultiplier)
-                    sendIntervalCounter = 0;
-                sendIntervalCounter++;
-            }
-        }
-
         void UpdateServerBroadcast()
         {
             // broadcast to all clients each 'sendInterval'
@@ -105,10 +93,14 @@ namespace Mirror
             // authoritative movement done by the host will have to be broadcasted
             // here by checking IsClientWithAuthority.
             // TODO send same time that NetworkServer sends time snapshot?
-            CheckLastSendTime();
 
-            if (sendIntervalCounter == sendIntervalMultiplier && // same interval as time interpolation!
-                (syncDirection == SyncDirection.ServerToClient || IsClientWithAuthority))
+            // timeAsDouble not available in older Unity versions.
+            if (!AccurateInterval.Elapsed(NetworkTime.localTime, NetworkServer.sendInterval * sendIntervalMultiplier, ref lastSendIntervalTime))
+            {
+                return;
+            }
+
+            if (syncDirection == SyncDirection.ServerToClient || IsClientWithAuthority)
             {
                 // send snapshot without timestamp.
                 // receiver gets it from batch timestamp to save bandwidth.
@@ -204,45 +196,48 @@ namespace Mirror
             // DO NOT send nulls if not changed 'since last send' either. we
             // send unreliable and don't know which 'last send' the other end
             // received successfully.
-            CheckLastSendTime();
-            if (sendIntervalCounter == sendIntervalMultiplier) // same interval as time interpolation!
+
+            // timeAsDouble not available in older Unity versions.
+            if (!AccurateInterval.Elapsed(NetworkTime.localTime, NetworkServer.sendInterval * sendIntervalMultiplier, ref lastSendIntervalTime))
             {
-                // send snapshot without timestamp.
-                // receiver gets it from batch timestamp to save bandwidth.
-                TransformSnapshot snapshot = Construct();
-#if onlySyncOnChange_BANDWIDTH_SAVING
-                cachedSnapshotComparison = CompareSnapshots(snapshot);
-                if (cachedSnapshotComparison && hasSentUnchangedPosition && onlySyncOnChange) { return; }
-#endif
-
-#if onlySyncOnChange_BANDWIDTH_SAVING
-                CmdClientToServerSync(
-                    // only sync what the user wants to sync
-                    syncPosition && positionChanged ? snapshot.position : default(Vector3?),
-                    syncRotation && rotationChanged ? snapshot.rotation : default(Quaternion?),
-                    syncScale && scaleChanged ? snapshot.scale : default(Vector3?)
-                );
-#else
-                CmdClientToServerSync(
-                    // only sync what the user wants to sync
-                    syncPosition ? snapshot.position : default(Vector3?),
-                    syncRotation ? snapshot.rotation : default(Quaternion?),
-                    syncScale    ? snapshot.scale    : default(Vector3?)
-                );
-#endif
-
-#if onlySyncOnChange_BANDWIDTH_SAVING
-                if (cachedSnapshotComparison)
-                {
-                    hasSentUnchangedPosition = true;
-                }
-                else
-                {
-                    hasSentUnchangedPosition = false;
-                    lastSnapshot = snapshot;
-                }
-#endif
+                return;
             }
+
+            // send snapshot without timestamp.
+            // receiver gets it from batch timestamp to save bandwidth.
+            TransformSnapshot snapshot = Construct();
+#if onlySyncOnChange_BANDWIDTH_SAVING
+            cachedSnapshotComparison = CompareSnapshots(snapshot);
+            if (cachedSnapshotComparison && hasSentUnchangedPosition && onlySyncOnChange) { return; }
+#endif
+
+#if onlySyncOnChange_BANDWIDTH_SAVING
+            CmdClientToServerSync(
+                // only sync what the user wants to sync
+                syncPosition && positionChanged ? snapshot.position : default(Vector3?),
+                syncRotation && rotationChanged ? snapshot.rotation : default(Quaternion?),
+                syncScale && scaleChanged ? snapshot.scale : default(Vector3?)
+            );
+#else
+            CmdClientToServerSync(
+                // only sync what the user wants to sync
+                syncPosition ? snapshot.position : default(Vector3?),
+                syncRotation ? snapshot.rotation : default(Quaternion?),
+                syncScale    ? snapshot.scale    : default(Vector3?)
+            );
+#endif
+
+#if onlySyncOnChange_BANDWIDTH_SAVING
+            if (cachedSnapshotComparison)
+            {
+                hasSentUnchangedPosition = true;
+            }
+            else
+            {
+                hasSentUnchangedPosition = false;
+                lastSnapshot = snapshot;
+            }
+#endif
         }
 
         void UpdateClientInterpolation()

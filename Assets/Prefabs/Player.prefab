@@ -414,8 +414,8 @@ MonoBehaviour:
   handsTransform: {fileID: 6694457422098715785}
   walkingSpeed: 5
   runningSpeed: 7.5
-  jumpSpeed: 8
-  gravity: 16
+  jumpSpeed: 12
+  gravity: 20
   moveSmoothTime: 0.01
   lookSpeed: 2
   lookXLimit: 90
