@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class PlayerInteraction : PlayerComponent
 {
+    [SerializeField] private Color crosshairHoverColor = new(0.1921569f, 0.6901961f, 0.2029286f, 0.4980392f);
+    [SerializeField] private Color crosshairInteractingColor = new(0.5602263f, 0.1921569f, 0.6901961f, 0.4980392f);
     [SerializeField] private float reachDistance;
     private InteractableGameObject targetGameObject = null;
 
@@ -40,23 +42,23 @@ public class PlayerInteraction : PlayerComponent
                     CmdLeftMouseButtonDown(interactable, interactionDistance, interactionPointOffset);
                 }
 
-                manager.Get<CrosshairManager>().SetColor(targetGameObject.Interactable.CrosshairHoverColor);
+                manager.Get<CrosshairManager>().SetColor(crosshairHoverColor);
             }
         }
 
         if (targetGameObject != null)
         {
-            manager.Get<CrosshairManager>().SetColor(targetGameObject.Interactable.CrosshairInteractingColor);
+            manager.Get<CrosshairManager>().SetColor(crosshairInteractingColor);
         }
     }
 
     [Command]
-    public void CmdLeftMouseButtonDown(NetworkIdentity interactable, float interactionDistance, Vector3 interactionPointOffset)
+    private void CmdLeftMouseButtonDown(NetworkIdentity interactable, float interactionDistance, Vector3 interactionPointOffset)
     {
         interactable.GetComponent<Interactable>().ServerLeftMouseButtonDown(player, interactionDistance, interactionPointOffset);
     }
     [Command]
-    public void CmdLeftMouseButtonUp(NetworkIdentity interactable)
+    private void CmdLeftMouseButtonUp(NetworkIdentity interactable)
     {
         interactable.GetComponent<Interactable>().ServerLeftMouseButtonUp(player);
     }

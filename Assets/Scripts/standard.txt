@@ -3,8 +3,9 @@ constants: public, protected, and private
 Awake-initialized references: private and protected, ie: GameManager
 readonly variables: private and protected
 variables: private and protected
+Mirror SyncVars
 
-properties: public
+properties: public, protected and private
 
 events: public
 
@@ -13,6 +14,6 @@ Mirror callbacks, ie: OnStartClient
 private methods
 protected methods: virtual, abstract, and normal
 public methods: virtual, abstract, and normal
-public Mirror: Commands, Rpcs, and TargetRpcs
-public Server methods
+Mirror Commands, Rpcs, and TargetRpcs: public, protected, and private
+Server methods: public, protected, and private
 static methods: public, protected, and private

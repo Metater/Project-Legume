@@ -5,9 +5,6 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // [SerializeField] private Color item color = new(0.2039216f, 0.5647059f, 0.8117647f, 0.4980392f);
-    // TODO use properties to expose unity refernces
-
     // Reminders:
     // Group any related things in your code
     // Don't prematurely optimise, be dumb

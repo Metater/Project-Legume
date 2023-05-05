@@ -297,6 +297,7 @@ GameObject:
   - component: {fileID: 9188071656844289672}
   - component: {fileID: 7484809925833178998}
   - component: {fileID: 4062145842297747305}
+  - component: {fileID: 6084751100149449628}
   - component: {fileID: 9188071656844289674}
   - component: {fileID: 9188071656844289675}
   m_Layer: 6
@@ -362,7 +363,7 @@ MonoBehaviour:
   syncScale: 0
   interpolatePosition: 1
   interpolateRotation: 1
-  interpolateScale: 1
+  interpolateScale: 0
   sendIntervalMultiplier: 1
   timelineOffset: 0
   showGizmos: 0
@@ -391,6 +392,7 @@ MonoBehaviour:
   components:
   - {fileID: 7484809925833178998}
   - {fileID: 4062145842297747305}
+  - {fileID: 6084751100149449628}
   invisibleToSelf:
   - {fileID: 9188071656565406130}
   - {fileID: 9188071657640904057}
@@ -414,8 +416,8 @@ MonoBehaviour:
   handsTransform: {fileID: 6694457422098715785}
   walkingSpeed: 5
   runningSpeed: 7.5
-  jumpSpeed: 12
-  gravity: 20
+  jumpSpeed: 8
+  gravity: 16
   moveSmoothTime: 0.01
   lookSpeed: 2
   lookXLimit: 90
@@ -434,6 +436,25 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  crosshairHoverColor: {r: 0.1921569, g: 0.6901961, b: 0.2029286, a: 0.4980392}
+  crosshairInteractingColor: {r: 0.5602263, g: 0.1921569, b: 0.6901961, a: 0.4980392}
+  reachDistance: 3
+--- !u!114 &6084751100149449628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9188071656844289678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96f93fd39aba8064180ff9c94f9a02ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  crosshairHoverColor: {r: 0.2039216, g: 0.5647059, b: 0.8117647, a: 0.4980392}
   reachDistance: 3
 --- !u!136 &9188071656844289674
 CapsuleCollider:
