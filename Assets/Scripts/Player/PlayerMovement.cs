@@ -92,4 +92,16 @@ public class PlayerMovement : PlayerComponent
 
         controllerWasGrounded = controller.isGrounded;
     }
+
+    public Vector3 GetVelocity()
+    {
+        Vector3 velocity = moveVelocity;
+        
+        if (controller.isGrounded)
+        {
+            velocity.y = 0;
+        }
+
+        return velocity;
+    }
 }

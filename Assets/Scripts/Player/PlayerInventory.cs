@@ -8,10 +8,13 @@ public class PlayerInventory : PlayerComponent
     private const int SlotCount = 3;
     [SerializeField] private Color crosshairHoverColor = new (0.2039216f, 0.5647059f, 0.8117647f, 0.4980392f);
     [SerializeField] private float reachDistance;
+    [SerializeField] private Transform gripTransform;
+    [SerializeField] private float itemRotationSlerpMultiplier;
     private readonly Item[] slots = new Item[SlotCount];
     private int selectedSlotLocal = 0;
     [SyncVar(hook = nameof(OnSelectedSlotChanged))] public int selectedSlotSynced = 0;
-    private Item LocallySelectedItem => slots[selectedSlotLocal];
+    private Item ClientSelectedItem => slots[selectedSlotLocal];
+    private Item ServerSelectedItem => slots[selectedSlotSynced];
 
     public override void PlayerUpdate()
     {
@@ -27,7 +30,7 @@ public class PlayerInventory : PlayerComponent
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    // TODO Send Pickup Command
+                    CmdPickupItem(item.netIdentity);
                 }
 
                 manager.Get<CrosshairManager>().SetColor(crosshairHoverColor);
@@ -35,18 +38,48 @@ public class PlayerInventory : PlayerComponent
         }
 
         UpdateSelectedSlot();
+
+        if (ClientSelectedItem != null)
+        {
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                Vector3 vector = Camera.main.transform.forward;
+                Vector3 velocity = player.Get<PlayerMovement>().GetVelocity();
+                CmdDropItem(forward, velocity);
+            }
+            else if (Input.GetMouseButtonDown(0))
+            {
+                CmdLeftMouseButtonDown();
+            }
+            else if (Input.GetMouseButtonDown(1))
+            {
+                CmdRightMouseButtonDown();
+            }
+        }
+
+        foreach (var item in slots)
+        {
+            if (item == null || !item.isOwned)
+            {
+                continue;
+            }
+
+            Vector3 position = gripTransform.position;
+            Quaternion rotation = Quaternion.Slerp(item.transform.rotation, gripTransform.rotation, Time.deltaTime * itemRotationSlerpMultiplier);
+            item.transform.SetPositionAndRotation(position, rotation);
+        }
     }
 
     private void OnSelectedSlotChanged(int oldSelectedSlot, int newSelectedSlot)
     {
         if (oldSelectedSlot >= 0 && oldSelectedSlot < SlotCount && slots[oldSelectedSlot] != null)
         {
-            // TODO slots[oldSelectedSlot].Deselect();
+            slots[oldSelectedSlot].ClientDeselect();
         }
 
         if (newSelectedSlot >= 0 && newSelectedSlot < SlotCount && slots[newSelectedSlot] != null)
         {
-            // TODO slots[newSelectedSlot].Select();
+            slots[newSelectedSlot].ClientSelect();
         }
     }
     private void UpdateSelectedSlot()
@@ -54,14 +87,14 @@ public class PlayerInventory : PlayerComponent
         int originalSelectedSlotLocal = selectedSlotLocal;
 
         float mouseScrollDelta = Input.mouseScrollDelta.y;
+        // Scroll up
         if (mouseScrollDelta > 0)
         {
-            // Scroll up
             selectedSlotLocal++;
         }
+        // Scroll down
         else if (mouseScrollDelta < 0)
         {
-            // Scroll down
             selectedSlotLocal--;
         }
 
@@ -89,17 +122,61 @@ public class PlayerInventory : PlayerComponent
 
         if (originalSelectedSlotLocal != selectedSlotLocal)
         {
-            CmdChangeSelectedSlot((byte)selectedSlotLocal);
+            CmdChangeSelectedSlot(selectedSlotLocal);
         }
     }
+
     [Command]
-    private void CmdChangeSelectedSlot(byte newSelectedSlot)
+    private void CmdChangeSelectedSlot(int selectedSlot)
     {
-        if (newSelectedSlot < 0 || newSelectedSlot > SlotCount)
+        if (selectedSlot < 0 || selectedSlot > SlotCount)
         {
             return;
         }
 
-        selectedSlotSynced = newSelectedSlot;
+        selectedSlotSynced = selectedSlot;
+    }
+    [Command]
+    private void CmdPickupItem(NetworkIdentity item)
+    {
+        if (item == null || item.IsHeld || ServerSelectedItem != null)
+        {
+            return;
+        }
+        
+        // Item has owner already
+        if (item.netIdentity.connectionToClient != null)
+        {
+            // Item's owner is incorrect
+            if (item.netIdentity.connectionToClient != connectionToClient)
+            {
+                item.netIdentity.RemoveClientAuthority();
+                item.netIdentity.AssignClientAuthority(connectionToClient);
+            }
+        }
+        // Item does not have owner already
+        else
+        {
+            // TODO Disable server rigidbody
+
+            item.netIdentity.AssignClientAuthority(connectionToClient);
+        }
+
+        // TODO item.ServerPickup();
+    }
+    [Command]
+    private void CmdDropItem(Vector3 vector, Vector3 velocity)
+    {
+
+    }
+    [Command]
+    private void CmdLeftMouseButtonDown()
+    {
+
+    }
+    [Command]
+    private void CmdRightMouseButtonDown()
+    {
+
     }
 }

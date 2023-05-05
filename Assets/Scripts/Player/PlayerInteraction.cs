@@ -55,17 +55,32 @@ public class PlayerInteraction : PlayerComponent
     [Command]
     private void CmdLeftMouseButtonDown(NetworkIdentity interactable, float interactionDistance, Vector3 interactionPointOffset)
     {
+        if (interactable == null)
+        {
+            return;
+        }
+
         interactable.GetComponent<Interactable>().ServerLeftMouseButtonDown(player, interactionDistance, interactionPointOffset);
     }
     [Command]
     private void CmdLeftMouseButtonUp(NetworkIdentity interactable)
     {
+        if (interactable == null)
+        {
+            return;
+        }
+
         interactable.GetComponent<Interactable>().ServerLeftMouseButtonUp(player);
     }
 
     [TargetRpc]
     public void RpcCancelInteraction(NetworkIdentity interactable)
     {
+        if (interactable == null)
+        {
+            return;
+        }
+
         if (interactable.GetComponent<Interactable>() == targetGameObject.Interactable)
         {
             targetGameObject = null;
