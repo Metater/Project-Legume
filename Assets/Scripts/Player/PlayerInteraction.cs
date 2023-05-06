@@ -9,47 +9,82 @@ public class PlayerInteraction : PlayerComponent
     [SerializeField] private Color crosshairHoverColor = new(0.1921569f, 0.6901961f, 0.2029286f, 0.4980392f);
     [SerializeField] private Color crosshairInteractingColor = new(0.5602263f, 0.1921569f, 0.6901961f, 0.4980392f);
     [SerializeField] private float reachDistance;
-    private InteractableGameObject targetGameObject = null;
+    private Interactable targetInteractable = null;
+    private InteractionType targetInteractionType = InteractionType.Click;
 
     public override void PlayerUpdate()
     {
-        if (targetGameObject != null && Input.GetMouseButtonUp(0))
+        if (!isLocalPlayer)
         {
-            CmdLeftMouseButtonUp(targetGameObject.Interactable.netIdentity);
-
-            targetGameObject = null;
-        }
-
-        if (!isLocalPlayer || !manager.Get<PhaseManager>().HasStarted || manager.Get<CursorManager>().IsCursorVisable)
-        {
-            targetGameObject = null;
+            targetInteractable = null;
 
             return;
         }
 
+        if (!manager.Get<PhaseManager>().HasStarted || manager.Get<CursorManager>().IsCursorVisable)
+        {
+            if (targetInteractable != null)
+            {
+                CmdCancelInteraction(targetInteractable.netIdentity);
+                targetInteractable = null;
+            }
+
+            return;
+        }
+
+        if (targetInteractable != null)
+        {
+            switch (targetInteractionType)
+            {
+                case InteractionType.Click:
+                    if (!Input.GetMouseButton(0))
+                    {
+                        CmdCancelInteraction(targetInteractable.netIdentity);
+                        targetInteractable = null;
+                    }
+                    break;
+            }
+        }
+
         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        if (targetGameObject == null && Physics.Raycast(ray, out var hit, reachDistance))
+        if (targetInteractable == null && Physics.Raycast(ray, out var hit, reachDistance))
         {
             if (hit.transform.TryGetComponent<InteractableGameObject>(out var targetGameObject))
             {
+                NetworkIdentity interactableNetIdentity = targetGameObject.Interactable.netIdentity;
+                float interactionDistance = hit.distance + 0.3f; // Why the 0.3f? Absolutely no clue!!!
+                Vector3 interactionPointOffset = hit.point - targetGameObject.transform.position;
+
                 if (Input.GetMouseButtonDown(0))
                 {
-                    this.targetGameObject = targetGameObject;
-
-                    NetworkIdentity interactableNetIdentity = targetGameObject.Interactable.netIdentity;
-                    float interactionDistance = hit.distance + 0.3f; // Why the 0.3f? Absolutely no clue!!!
-                    Vector3 interactionPointOffset = hit.point - targetGameObject.transform.position;
                     CmdLeftMouseButtonDown(interactableNetIdentity, interactionDistance, interactionPointOffset);
+                }
+                else if (Input.GetKeyDown(KeyCode.E))
+                {
+                    CmdEKeyDown(interactableNetIdentity);
                 }
 
                 manager.Get<CrosshairManager>().SetColor(crosshairHoverColor);
             }
         }
 
-        if (targetGameObject != null)
+        if (targetInteractable != null)
         {
             manager.Get<CrosshairManager>().SetColor(crosshairInteractingColor);
         }
+    }
+
+    [Client]
+    public bool ClientUseEscapeKeyDown()
+    {
+        if (targetInteractable != null && targetInteractionType == InteractionType.EKey)
+        {
+            CmdCancelInteraction(targetInteractable.netIdentity);
+            targetInteractable = null;
+            return true;
+        }
+
+        return false;
     }
 
     [Command]
@@ -63,16 +98,37 @@ public class PlayerInteraction : PlayerComponent
         interactable.ServerLeftMouseButtonDown(player, interactionDistance, interactionPointOffset);
     }
     [Command]
-    private void CmdLeftMouseButtonUp(NetworkIdentity interactableNetIdentity)
+    private void CmdEKeyDown(NetworkIdentity interactableNetIdentity)
     {
         if (!interactableNetIdentity.TryGetComponent(out Interactable interactable))
         {
             return;
         }
 
-        interactable.ServerLeftMouseButtonUp(player);
+        interactable.ServerEKeyDown(player);
+    }
+    [Command]
+    private void CmdCancelInteraction(NetworkIdentity interactableNetIdentity)
+    {
+        if (!interactableNetIdentity.TryGetComponent(out Interactable interactable))
+        {
+            return;
+        }
+
+        interactable.ServerCancelInteraction(player);
     }
 
+    [TargetRpc]
+    public void RpcAcceptInteraction(NetworkIdentity interactableNetIdentity, InteractionType interactionType)
+    {
+        if (!interactableNetIdentity.TryGetComponent(out Interactable interactable))
+        {
+            return;
+        }
+
+        targetInteractable = interactable;
+        targetInteractionType = interactionType;
+    }
     [TargetRpc]
     public void RpcCancelInteraction(NetworkIdentity interactableNetIdentity)
     {
@@ -81,9 +137,9 @@ public class PlayerInteraction : PlayerComponent
             return;
         }
 
-        if (interactable == targetGameObject.Interactable)
+        if (interactable == targetInteractable)
         {
-            targetGameObject = null;
+            targetInteractable = null;
         }
     }
 }

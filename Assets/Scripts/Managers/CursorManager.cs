@@ -14,8 +14,11 @@ public class CursorManager : Manager
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                IsCursorVisable = !IsCursorVisable;
-                UpdateCursorVisibility();
+                if (IsCursorVisable || !manager.Get<PlayerManager>().LocalPlayer.Get<PlayerInteraction>().ClientUseEscapeKeyDown())
+                {
+                    IsCursorVisable = !IsCursorVisable;
+                    UpdateCursorVisibility();
+                }
             }
         }
         else

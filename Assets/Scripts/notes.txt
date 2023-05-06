@@ -1,13 +1,36 @@
+// Todo
+Interacting with the bomb
+
+Press button on an interface panel
+
+Opens up ui panel
+
+Logic puzzle, and, or, multiple lights, some good some bad, they are outputs,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Ideas
 Fingerprint brushing the b, compare with samples from suspects, figure out bombers
 Dust it for finger prints
 
 Save the whales org is suspected of planting this b, funny intro text like that
 
 VOR, decievers, multiple vor frequencies you can tune onto
-
-Visibility
-
-
-Logic puzzle, and, or, multiple lights, some good some bad, they are outputs,
 switches, inputs
 
+yt tutorials on vor and complex things???

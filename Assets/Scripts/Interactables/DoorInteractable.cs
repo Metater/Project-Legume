@@ -48,10 +48,14 @@ public class DoorInteractable : Interactable
     [Server]
     public override void ServerLeftMouseButtonDown(Player player, float interactionDistance, Vector3 interactionPointOffset)
     {
-        interactor ??= (player, interactionDistance, interactionPointOffset);
+        if (interactor == null)
+        {
+            interactor = (player, interactionDistance, interactionPointOffset);
+            player.Get<PlayerInteraction>().RpcAcceptInteraction(netIdentity, InteractionType.Click);
+        }
     }
     [Server]
-    public override void ServerLeftMouseButtonUp(Player player)
+    public override void ServerCancelInteraction(Player player)
     {
         if (interactor != null && player == interactor.Value.player)
         {

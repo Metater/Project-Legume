@@ -47,8 +47,9 @@ public abstract class Interactable : NetworkBehaviour
         return currentInteractionDistance < maxInteractionDistance;
     }
 
-    public abstract void ServerLeftMouseButtonDown(Player player, float interactionDistance, Vector3 interactionPointOffset);
-    public abstract void ServerLeftMouseButtonUp(Player player);
+    public virtual void ServerLeftMouseButtonDown(Player player, float interactionDistance, Vector3 interactionPointOffset) { }
+    public virtual void ServerEKeyDown(Player player) { }
+    public virtual void ServerCancelInteraction(Player player) { }
 
     protected static Vector3 GetPlayerInteractionPoint(Player player, float interactionDistance, Vector3 interactionPointOffset)
     {
