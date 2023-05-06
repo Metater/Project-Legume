@@ -523,7 +523,7 @@ MonoBehaviour:
   crosshairHoverColor: {r: 0.2039216, g: 0.5647059, b: 0.8117647, a: 0.4980392}
   reachDistance: 3
   gripTransform: {fileID: 6298616452703743551}
-  itemRotationSlerpMultiplier: 50
+  itemRotationSlerpMultiplier: 50000
 --- !u!136 &9188071656844289674
 CapsuleCollider:
   m_ObjectHideFlags: 0

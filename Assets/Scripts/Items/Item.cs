@@ -11,6 +11,7 @@ public abstract class Item : NetworkBehaviour
     private NetworkTransform networkTransform;
     protected GameManager manager;
     [SyncVar(hook = nameof(OnHolderChanged))] private NetworkIdentity holderNetIdentitySynced = null;
+    [SyncVar(hook = nameof(OnIsVisibleChanged))] private bool isVisible = true;
     public bool IsHeld => holderNetIdentitySynced != null;
 
     private void Awake()
@@ -24,8 +25,6 @@ public abstract class Item : NetworkBehaviour
     private void Start() => ItemStart();
     private void Update()
     {
-        ownedRigidbody.Rigidbody.WakeUp();
-
         ItemUpdate();
     }
     private void LateUpdate() => ItemLateUpdate();
@@ -93,7 +92,10 @@ public abstract class Item : NetworkBehaviour
 
             foreach (var item in manager.Get<ItemManager>().Items.Refs)
             {
-                item.ownedRigidbody.Rigidbody.WakeUp();
+                if (item.ownedRigidbody.Rigidbody != null)
+                {
+                    item.ownedRigidbody.Rigidbody.WakeUp();
+                }
             }
         }
         else
@@ -109,6 +111,10 @@ public abstract class Item : NetworkBehaviour
                 ownedRigidbody.EnableColliders();
             }
         }
+    }
+    private void OnIsVisibleChanged(bool _,  bool newIsVisible)
+    {
+        modelGameObject.SetActive(newIsVisible);
     }
 
     protected virtual void ItemAwake() { }
@@ -137,6 +143,11 @@ public abstract class Item : NetworkBehaviour
         }
 
         return !IsHeld;
+    }
+    [Server]
+    public void ServerUpdateVisibility(bool isVisible)
+    {
+        this.isVisible = isVisible;
     }
 
     [Client]

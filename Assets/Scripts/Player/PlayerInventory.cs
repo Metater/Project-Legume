@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEditor.Progress;
 
 public class PlayerInventory : PlayerComponent
 {
@@ -18,6 +19,19 @@ public class PlayerInventory : PlayerComponent
 
     public override void PlayerUpdate()
     {
+        if (isServer)
+        {
+            foreach (var item in slots)
+            {
+                if (item == null)
+                {
+                    continue;
+                }
+
+                item.ServerUpdateVisibility(item == SelectedItem);
+            }
+        }
+
         if (!isLocalPlayer || !manager.Get<PhaseManager>().HasStarted || manager.Get<CursorManager>().IsCursorVisable)
         {
             return;
@@ -62,9 +76,8 @@ public class PlayerInventory : PlayerComponent
                 continue;
             }
 
-            Vector3 position = gripTransform.position;
             Quaternion rotation = Quaternion.Slerp(item.transform.rotation, gripTransform.rotation, Time.deltaTime * itemRotationSlerpMultiplier);
-            item.transform.SetPositionAndRotation(position, rotation);
+            item.transform.SetPositionAndRotation(gripTransform.position, rotation);
         }
     }
 
@@ -186,6 +199,7 @@ public class PlayerInventory : PlayerComponent
             return;
         }
 
+        item.transform.SetPositionAndRotation(gripTransform.position, gripTransform.rotation);
         slots[slot] = item;
     }
     [TargetRpc]
