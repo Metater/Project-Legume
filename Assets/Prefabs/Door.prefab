@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3073867775235958147}
   - component: {fileID: 3073867775235958146}
   - component: {fileID: 3073867775235958144}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Door
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,8 +101,6 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  crosshairHoverColor: {r: 0.1921569, g: 0.6901961, b: 0.2029286, a: 0.4980392}
-  crosshairInteractingColor: {r: 0.5602263, g: 0.1921569, b: 0.6901961, a: 0.4980392}
   maxInteractionDistance: 4
   angleSmoothTime: 0.1
 --- !u!1 &3073867775658420939
@@ -117,7 +115,7 @@ GameObject:
   - component: {fileID: 3073867775658420932}
   - component: {fileID: 3073867775658420933}
   - component: {fileID: 3073867775658420938}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -216,7 +214,7 @@ GameObject:
   - component: {fileID: 3073867776414797877}
   - component: {fileID: 3073867776414797879}
   - component: {fileID: 3073867776414797873}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Handle
   m_TagString: Untagged
   m_Icon: {fileID: 0}

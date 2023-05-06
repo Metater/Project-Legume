@@ -1,4 +1,5 @@
 using Mirror;
+using UnityEditor;
 using UnityEngine;
 
 public abstract class Interactable : NetworkBehaviour
@@ -15,6 +16,25 @@ public abstract class Interactable : NetworkBehaviour
     private void Start() => InteractableStart();
     private void Update() => InteractableUpdate();
     private void LateUpdate() => InteractableLateUpdate();
+    private void OnValidate()
+    {
+        // Ensure all items and children of items have the "Interactable" layer set
+        EditorApplication.delayCall += () =>
+        {
+            if (Application.isPlaying || !gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
+            int layer = LayerMask.NameToLayer("Interactable");
+            gameObject.layer = layer;
+            var children = gameObject.GetComponentsInChildren<Transform>(true);
+            foreach (Transform child in children)
+            {
+                child.gameObject.layer = layer;
+            }
+        };
+    }
 
     protected virtual void InteractableAwake() { }
     protected virtual void InteractableStart() { }

@@ -2,6 +2,7 @@ using Mirror;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerInventory : PlayerComponent
 {
@@ -11,10 +12,8 @@ public class PlayerInventory : PlayerComponent
     [SerializeField] private Transform gripTransform;
     [SerializeField] private float itemRotationSlerpMultiplier;
     private readonly Item[] slots = new Item[SlotCount];
-    private int selectedSlotLocal = 0;
-    [SyncVar(hook = nameof(OnSelectedSlotChanged))] public int selectedSlotSynced = 0;
-    private Item ClientSelectedItem => slots[selectedSlotLocal];
-    private Item ServerSelectedItem => slots[selectedSlotSynced];
+    private int selectedSlot = 0;
+    private Item SelectedItem { get { return slots[selectedSlot]; } set { slots[selectedSlot] = value; } }
 
     public override void PlayerUpdate()
     {
@@ -24,7 +23,7 @@ public class PlayerInventory : PlayerComponent
         }
 
         Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-        if (Physics.Raycast(ray, out var hit, reachDistance))
+        if (SelectedItem == null && Physics.Raycast(ray, out var hit, reachDistance))
         {
             if (hit.transform.TryGetComponent<Item>(out var item) && !item.IsHeld)
             {
@@ -39,13 +38,13 @@ public class PlayerInventory : PlayerComponent
 
         UpdateSelectedSlot();
 
-        if (ClientSelectedItem != null)
+        if (SelectedItem != null)
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
                 Vector3 vector = Camera.main.transform.forward;
                 Vector3 velocity = player.Get<PlayerMovement>().GetVelocity();
-                CmdDropItem(forward, velocity);
+                CmdDropItem(vector, velocity);
             }
             else if (Input.GetMouseButtonDown(0))
             {
@@ -70,59 +69,47 @@ public class PlayerInventory : PlayerComponent
         }
     }
 
-    private void OnSelectedSlotChanged(int oldSelectedSlot, int newSelectedSlot)
-    {
-        if (oldSelectedSlot >= 0 && oldSelectedSlot < SlotCount && slots[oldSelectedSlot] != null)
-        {
-            slots[oldSelectedSlot].ClientDeselect();
-        }
-
-        if (newSelectedSlot >= 0 && newSelectedSlot < SlotCount && slots[newSelectedSlot] != null)
-        {
-            slots[newSelectedSlot].ClientSelect();
-        }
-    }
     private void UpdateSelectedSlot()
     {
-        int originalSelectedSlotLocal = selectedSlotLocal;
+        int originalSelectedSlot = selectedSlot;
 
         float mouseScrollDelta = Input.mouseScrollDelta.y;
         // Scroll up
         if (mouseScrollDelta > 0)
         {
-            selectedSlotLocal++;
+            selectedSlot++;
         }
         // Scroll down
         else if (mouseScrollDelta < 0)
         {
-            selectedSlotLocal--;
+            selectedSlot--;
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            selectedSlotLocal = 0;
+            selectedSlot = 0;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            selectedSlotLocal = 1;
+            selectedSlot = 1;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            selectedSlotLocal = 2;
+            selectedSlot = 2;
         }
 
-        if (selectedSlotLocal < 0)
+        if (selectedSlot < 0)
         {
-            selectedSlotLocal = SlotCount - 1;
+            selectedSlot = SlotCount - 1;
         }
-        else if (selectedSlotLocal >= SlotCount)
+        else if (selectedSlot >= SlotCount)
         {
-            selectedSlotLocal = 0;
+            selectedSlot = 0;
         }
 
-        if (originalSelectedSlotLocal != selectedSlotLocal)
+        if (originalSelectedSlot != selectedSlot)
         {
-            CmdChangeSelectedSlot(selectedSlotLocal);
+            CmdChangeSelectedSlot(selectedSlot);
         }
     }
 
@@ -134,12 +121,12 @@ public class PlayerInventory : PlayerComponent
             return;
         }
 
-        selectedSlotSynced = selectedSlot;
+        this.selectedSlot = selectedSlot;
     }
     [Command]
-    private void CmdPickupItem(NetworkIdentity item)
+    private void CmdPickupItem(NetworkIdentity itemNetIdentity)
     {
-        if (item == null || item.IsHeld || ServerSelectedItem != null)
+        if (!itemNetIdentity.TryGetComponent(out Item item) || item.IsHeld || SelectedItem != null)
         {
             return;
         }
@@ -162,21 +149,52 @@ public class PlayerInventory : PlayerComponent
             item.netIdentity.AssignClientAuthority(connectionToClient);
         }
 
-        // TODO item.ServerPickup();
+        if (item.ServerPickup(player))
+        {
+            SelectedItem = item;
+            RpcPickupItem(item.netIdentity, selectedSlot);
+        }
     }
     [Command]
     private void CmdDropItem(Vector3 vector, Vector3 velocity)
     {
+        Item item = SelectedItem;
+        if (item == null)
+        {
+            return;
+        }
 
+        if (item.ServerDrop(player, vector, velocity))
+        {
+            SelectedItem = null;
+            RpcDropItem(selectedSlot);
+        }
     }
     [Command]
     private void CmdLeftMouseButtonDown()
     {
-
+        
     }
     [Command]
     private void CmdRightMouseButtonDown()
     {
 
+    }
+
+    [TargetRpc]
+    private void RpcPickupItem(NetworkIdentity itemNetIdentity, int slot)
+    {
+        if (!itemNetIdentity.TryGetComponent(out Item item))
+        {
+            return;
+        }
+
+        slots[slot] = item;
+        item.transform.SetPositionAndRotation(gripTransform.position, gripTransform.rotation);
+    }
+    [TargetRpc]
+    private void RpcDropItem(int slot)
+    {
+        slots[slot] = null;
     }
 }

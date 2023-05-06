@@ -36,10 +36,10 @@ public class PlayerInteraction : PlayerComponent
                 {
                     this.targetGameObject = targetGameObject;
 
-                    NetworkIdentity interactable = targetGameObject.Interactable.netIdentity;
+                    NetworkIdentity interactableNetIdentity = targetGameObject.Interactable.netIdentity;
                     float interactionDistance = hit.distance + 0.3f; // Why the 0.3f? Absolutely no clue!!!
                     Vector3 interactionPointOffset = hit.point - targetGameObject.transform.position;
-                    CmdLeftMouseButtonDown(interactable, interactionDistance, interactionPointOffset);
+                    CmdLeftMouseButtonDown(interactableNetIdentity, interactionDistance, interactionPointOffset);
                 }
 
                 manager.Get<CrosshairManager>().SetColor(crosshairHoverColor);
@@ -53,35 +53,35 @@ public class PlayerInteraction : PlayerComponent
     }
 
     [Command]
-    private void CmdLeftMouseButtonDown(NetworkIdentity interactable, float interactionDistance, Vector3 interactionPointOffset)
+    private void CmdLeftMouseButtonDown(NetworkIdentity interactableNetIdentity, float interactionDistance, Vector3 interactionPointOffset)
     {
-        if (interactable == null)
+        if (!interactableNetIdentity.TryGetComponent(out Interactable interactable))
         {
             return;
         }
 
-        interactable.GetComponent<Interactable>().ServerLeftMouseButtonDown(player, interactionDistance, interactionPointOffset);
+        interactable.ServerLeftMouseButtonDown(player, interactionDistance, interactionPointOffset);
     }
     [Command]
-    private void CmdLeftMouseButtonUp(NetworkIdentity interactable)
+    private void CmdLeftMouseButtonUp(NetworkIdentity interactableNetIdentity)
     {
-        if (interactable == null)
+        if (!interactableNetIdentity.TryGetComponent(out Interactable interactable))
         {
             return;
         }
 
-        interactable.GetComponent<Interactable>().ServerLeftMouseButtonUp(player);
+        interactable.ServerLeftMouseButtonUp(player);
     }
 
     [TargetRpc]
-    public void RpcCancelInteraction(NetworkIdentity interactable)
+    public void RpcCancelInteraction(NetworkIdentity interactableNetIdentity)
     {
-        if (interactable == null)
+        if (!interactableNetIdentity.TryGetComponent(out Interactable interactable))
         {
             return;
         }
 
-        if (interactable.GetComponent<Interactable>() == targetGameObject.Interactable)
+        if (interactable == targetGameObject.Interactable)
         {
             targetGameObject = null;
         }
