@@ -1,23 +1,34 @@
 using Mirror;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 public abstract class Item : NetworkBehaviour
 {
-    [SerializeField] protected float dropForceMultiplier;
-    [SerializeField] protected GameObject modelGameObject;
+    private const float PickupSyncSeconds = 0.5f;
+    [SerializeField] private float dropForceMultiplier;
+    [SerializeField] private GameObject modelGameObject;
+    private OwnedRigidbody ownedRigidbody;
+    private NetworkTransform networkTransform;
     protected GameManager manager;
-    protected OwnedRigidbody ownedRigidbody;
-    [SyncVar] private NetworkIdentity holderNetIdentitySynced = null;
+    [SyncVar(hook = nameof(OnHolderChanged))] private NetworkIdentity holderNetIdentitySynced = null;
     public bool IsHeld => holderNetIdentitySynced != null;
 
     private void Awake()
     {
-        manager = FindObjectOfType<GameManager>(true);
         ownedRigidbody = GetComponent<OwnedRigidbody>();
+        networkTransform = GetComponent<NetworkTransform>();
+        manager = FindObjectOfType<GameManager>(true);
+
+        ItemAwake();
     }
+    private void Start() => ItemStart();
+    private void Update()
+    {
+        ownedRigidbody.Rigidbody.WakeUp();
+
+        ItemUpdate();
+    }
+    private void LateUpdate() => ItemLateUpdate();
     private void OnValidate()
     {
         // Ensure all items and children of items have the "Item" layer set
@@ -40,46 +51,97 @@ public abstract class Item : NetworkBehaviour
 
     public override void OnStartClient()
     {
+        if (isServer)
+        {
+            return;
+        }
+
+        // Maintain item lookup
+        manager.Get<ItemManager>().Items.Add(this);
+
         ownedRigidbody.EnableColliders();
+        ownedRigidbody.Disable();
     }
     public override void OnStartServer()
     {
+        // Maintain item lookup
+        manager.Get<ItemManager>().Items.Add(this);
+
+        netIdentity.AssignClientAuthority(NetworkServer.localConnection);
+
         ownedRigidbody.EnableColliders();
         ownedRigidbody.Enable();
     }
-    public override void OnStartAuthority()
+    public override void OnStopClient()
     {
-        ownedRigidbody.Enable();
+        // Maintain item lookup
+        manager.Get<ItemManager>().Items.Remove(this);
     }
-    public override void OnStopAuthority()
+    public override void OnStopServer()
     {
-        ownedRigidbody.Disable();
+        // Maintain item lookup
+        manager.Get<ItemManager>().Items.Remove(this);
     }
 
-    protected abstract void ItemPickup();
+    private void OnHolderChanged(NetworkIdentity oldHolder, NetworkIdentity newHolder)
+    {
+        if (newHolder != null)
+        {
+            // Pickup
+            ownedRigidbody.DisableColliders();
+            ownedRigidbody.Disable();
+
+            foreach (var item in manager.Get<ItemManager>().Items.Refs)
+            {
+                item.ownedRigidbody.Rigidbody.WakeUp();
+            }
+        }
+        else
+        {
+            // Drop
+            if (manager.Get<PlayerManager>().LocalPlayer.netId == oldHolder.netId)
+            {
+                ownedRigidbody.EnableColliders();
+                ownedRigidbody.Enable();
+            }
+            else
+            {
+                ownedRigidbody.EnableColliders();
+            }
+        }
+    }
+
+    protected virtual void ItemAwake() { }
+    protected virtual void ItemStart() { }
+    protected virtual void ItemUpdate() { }
+    protected virtual void ItemLateUpdate() { }
+    protected abstract bool ServerItemPickup(Player player);
+    protected abstract bool ServerItemDrop(Player player);
 
     [Server]
     public bool ServerPickup(Player player)
     {
-        holderNetIdentitySynced = player.netIdentity;
-        ownedRigidbody.DisableColliders();
-        ownedRigidbody.Disable();
-        ItemPickup();
+        if (ServerItemPickup(player))
+        {
+            holderNetIdentitySynced = player.netIdentity;
+        }
 
-        return true;
-    }
-    [Client]
-    public void ClientPickup()
-    {
-
+        return IsHeld;
     }
     [Server]
-    public bool ServerDrop(Player player, Vector3 vector, Vector3 velocity)
+    public bool ServerDrop(Player player)
     {
-        holderNetIdentitySynced = null;
-        ownedRigidbody.EnableColliders();
-        ownedRigidbody.Enable();
+        if (ServerItemDrop(player))
+        {
+            holderNetIdentitySynced = null;
+        }
 
-        return true;
+        return !IsHeld;
+    }
+
+    [Client]
+    public void ClientAddDropForce(Vector3 vector, Vector3 velocity)
+    {
+        ownedRigidbody.Rigidbody.AddForce((vector * dropForceMultiplier) + velocity, ForceMode.Impulse);
     }
 }

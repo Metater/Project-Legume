@@ -16,4 +16,5 @@ protected methods: virtual, abstract, and normal
 public methods: virtual, abstract, and normal
 Mirror Commands, Rpcs, and TargetRpcs: public, protected, and private
 Server methods: public, protected, and private
+Client methods: public, protected, and private
 static methods: public, protected, and private

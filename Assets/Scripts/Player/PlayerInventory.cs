@@ -14,6 +14,7 @@ public class PlayerInventory : PlayerComponent
     private readonly Item[] slots = new Item[SlotCount];
     private int selectedSlot = 0;
     private Item SelectedItem { get { return slots[selectedSlot]; } set { slots[selectedSlot] = value; } }
+    public Transform GripTransform => gripTransform;
 
     public override void PlayerUpdate()
     {
@@ -42,9 +43,7 @@ public class PlayerInventory : PlayerComponent
         {
             if (Input.GetKeyDown(KeyCode.G))
             {
-                Vector3 vector = Camera.main.transform.forward;
-                Vector3 velocity = player.Get<PlayerMovement>().GetVelocity();
-                CmdDropItem(vector, velocity);
+                CmdDropItem();
             }
             else if (Input.GetMouseButtonDown(0))
             {
@@ -144,8 +143,6 @@ public class PlayerInventory : PlayerComponent
         // Item does not have owner already
         else
         {
-            // TODO Disable server rigidbody
-
             item.netIdentity.AssignClientAuthority(connectionToClient);
         }
 
@@ -156,7 +153,7 @@ public class PlayerInventory : PlayerComponent
         }
     }
     [Command]
-    private void CmdDropItem(Vector3 vector, Vector3 velocity)
+    private void CmdDropItem()
     {
         Item item = SelectedItem;
         if (item == null)
@@ -164,10 +161,10 @@ public class PlayerInventory : PlayerComponent
             return;
         }
 
-        if (item.ServerDrop(player, vector, velocity))
+        if (item.ServerDrop(player))
         {
             SelectedItem = null;
-            RpcDropItem(selectedSlot);
+            RpcDropItem(item.netIdentity, selectedSlot);
         }
     }
     [Command]
@@ -190,11 +187,18 @@ public class PlayerInventory : PlayerComponent
         }
 
         slots[slot] = item;
-        item.transform.SetPositionAndRotation(gripTransform.position, gripTransform.rotation);
     }
     [TargetRpc]
-    private void RpcDropItem(int slot)
+    private void RpcDropItem(NetworkIdentity itemNetIdentity, int slot)
     {
+        if (!itemNetIdentity.TryGetComponent(out Item item))
+        {
+            return;
+        }
+
+        Vector3 vector = Camera.main.transform.forward;
+        Vector3 velocity = player.Get<PlayerMovement>().GetVelocity();
+        item.ClientAddDropForce(vector, velocity);
         slots[slot] = null;
     }
 }

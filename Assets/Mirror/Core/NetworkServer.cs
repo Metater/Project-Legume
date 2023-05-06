@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Mirror.RemoteCalls;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Mirror
 {
@@ -300,6 +302,12 @@ namespace Mirror
             bool requiresAuthority = RemoteProcedureCalls.CommandRequiresAuthority(msg.functionHash);
             if (requiresAuthority && identity.connectionToClient != conn)
             {
+                if (identity.GetComponent("Item").GetType().BaseType.ToString() == "Item")
+                {
+                    // Hide command authority warnings for items, this is expected
+                    return;
+                }
+
                 Debug.LogWarning($"Command for object without authority [netId={msg.netId}]");
                 return;
             }
