@@ -21,7 +21,14 @@ public abstract class Interactable : NetworkBehaviour
         // Ensure all items and children of items have the "Interactable" layer set
         EditorApplication.delayCall += () =>
         {
-            if (Application.isPlaying || !gameObject.activeInHierarchy)
+            try
+            {
+                if (Application.isPlaying || !gameObject.activeInHierarchy)
+                {
+                    return;
+                }
+            }
+            catch
             {
                 return;
             }

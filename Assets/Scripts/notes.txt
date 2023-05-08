@@ -1,8 +1,8 @@
+// Reminders:
+Group any related things in your code
+Don't prematurely optimise, be dumb
+
 // Todo
-Interacting with the bomb
-
-Press button on an interface panel
-
 Opens up ui panel
 
 Logic puzzle, and, or, multiple lights, some good some bad, they are outputs,
@@ -25,6 +25,8 @@ Logic puzzle, and, or, multiple lights, some good some bad, they are outputs,
 
 
 // Ideas
+Car, garage, mail box, sewer electrical box, trashcan. Dumpster
+
 Fingerprint brushing the b, compare with samples from suspects, figure out bombers
 Dust it for finger prints
 

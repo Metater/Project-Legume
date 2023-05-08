@@ -1,14 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Reminders:
-    // Group any related things in your code
-    // Don't prematurely optimise, be dumb
-
     [SerializeField] private List<Manager> managers;
     private readonly Dictionary<Type, Manager> cachedManagers = new();
 

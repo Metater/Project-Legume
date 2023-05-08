@@ -33,7 +33,14 @@ public abstract class Item : NetworkBehaviour
         // Ensure all items and children of items have the "Item" layer set
         EditorApplication.delayCall += () =>
         {
-            if (Application.isPlaying || !gameObject.activeInHierarchy)
+            try
+            {
+                if (Application.isPlaying || !gameObject.activeInHierarchy)
+                {
+                    return;
+                }
+            }
+            catch
             {
                 return;
             }

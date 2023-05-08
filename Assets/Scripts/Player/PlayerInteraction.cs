@@ -1,7 +1,4 @@
 using Mirror;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerInteraction : PlayerComponent
@@ -32,12 +29,20 @@ public class PlayerInteraction : PlayerComponent
             return;
         }
 
+        // TODO Fix
         if (targetInteractable != null)
         {
             switch (targetInteractionType)
             {
                 case InteractionType.Click:
                     if (!Input.GetMouseButton(0))
+                    {
+                        CmdCancelInteraction(targetInteractable.netIdentity);
+                        targetInteractable = null;
+                    }
+                    break;
+                case InteractionType.EKey:
+                    if (Input.GetKeyDown(KeyCode.E))
                     {
                         CmdCancelInteraction(targetInteractable.netIdentity);
                         targetInteractable = null;
@@ -75,7 +80,7 @@ public class PlayerInteraction : PlayerComponent
     }
 
     [Client]
-    public bool ClientUseEscapeKeyDown()
+    public bool ClientTryUseEscapeKeyDown()
     {
         if (targetInteractable != null && targetInteractionType == InteractionType.EKey)
         {
