@@ -32,7 +32,7 @@ public class PlayerInventory : PlayerComponent
             }
         }
 
-        if (!isLocalPlayer || !manager.Get<PhaseManager>().HasStarted || manager.Get<CursorManager>().IsCursorVisable)
+        if (!isLocalPlayer || !manager.Get<PhaseManager>().ShouldPlayerMove)
         {
             return;
         }

@@ -2,37 +2,24 @@ using UnityEngine;
 
 public class CursorManager : Manager
 {
+    private bool isInit = false;
     public bool IsCursorVisable { get; private set; } = true;
 
     public override void ManagerAwake()
     {
-        UpdateCursorVisibility();
-    }
-    public override void ManagerUpdate()
-    {
-        if (!manager.Get<PlayerManager>().IsLocalPlayerNull)
-        {
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                if (IsCursorVisable || !manager.Get<PlayerManager>().LocalPlayer.Get<PlayerInteraction>().ClientTryUseEscapeKeyDown())
-                {
-                    IsCursorVisable = !IsCursorVisable;
-                    UpdateCursorVisibility();
-                }
-            }
-        }
-        else
-        {
-            IsCursorVisable = true;
-            UpdateCursorVisibility();
-        }
-
-        manager.Get<CrosshairManager>().SetVisibility(!IsCursorVisable);
+        SetVisibility(IsCursorVisable);
     }
 
-    private void UpdateCursorVisibility()
+    public void SetVisibility(bool isCursorVisible)
     {
-        Cursor.lockState = IsCursorVisable ? CursorLockMode.None : CursorLockMode.Locked;
-        Cursor.visible = IsCursorVisable;
+        if (isInit && isCursorVisible == IsCursorVisable)
+        {
+            return;
+        }
+
+        isInit = true;
+        Cursor.lockState = isCursorVisible ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = isCursorVisible;
+        IsCursorVisable = isCursorVisible;
     }
 }

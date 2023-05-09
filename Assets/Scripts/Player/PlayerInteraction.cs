@@ -18,7 +18,7 @@ public class PlayerInteraction : PlayerComponent
             return;
         }
 
-        if (!manager.Get<PhaseManager>().HasStarted || manager.Get<CursorManager>().IsCursorVisable)
+        if (!manager.Get<PhaseManager>().ShouldPlayerMove)
         {
             if (targetInteractable != null)
             {

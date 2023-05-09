@@ -5,6 +5,13 @@ using UnityEngine;
 
 public class BombInteractable : Interactable
 {
+    private BombDefusalUiPanel panel;
+
+    protected override void InteractableAwake()
+    {
+        panel = FindObjectOfType<BombDefusalUiPanel>(true);
+    }
+
     [Server]
     public override void ServerEKeyDown(Player player)
     {
@@ -19,6 +26,6 @@ public class BombInteractable : Interactable
     [TargetRpc]
     private void RpcOpenUi(NetworkConnectionToClient _)
     {
-
+        panel.Open();
     }
 }

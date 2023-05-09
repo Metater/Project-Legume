@@ -25,7 +25,7 @@ public class PlayerMovement : PlayerComponent
 
     public override void PlayerUpdate()
     {
-        if (!isLocalPlayer || !manager.Get<PhaseManager>().HasStarted)
+        if (!isLocalPlayer || !manager.Get<PhaseManager>().ShouldPlayerMove)
         {
             return;
         }
