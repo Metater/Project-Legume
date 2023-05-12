@@ -25,7 +25,7 @@ public class PlayerMovement : PlayerComponent
 
     public override void PlayerUpdate()
     {
-        if (!isLocalPlayer || !manager.Get<PhaseManager>().ShouldPlayerMove)
+        if (!isLocalPlayer || !manager.Get<PhaseManager>().IsPlayerReady)
         {
             return;
         }
@@ -49,8 +49,7 @@ public class PlayerMovement : PlayerComponent
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
 
-        // Stop movement when cursor is being used
-        if (manager.Get<CursorManager>().IsCursorVisable)
+        if (!manager.Get<PhaseManager>().ShouldPlayerMove)
         {
             moveX = 0;
             moveY = 0;
@@ -59,8 +58,7 @@ public class PlayerMovement : PlayerComponent
         float moveVelocityY = moveVelocity.y;
         moveVelocity = (forward * moveX) + (right * moveY);
 
-        // Allow jumps only when cursor is hidden and is grounded
-        if (!manager.Get<CursorManager>().IsCursorVisable && controller.isGrounded && Input.GetButtonDown("Jump"))
+        if (manager.Get<PhaseManager>().ShouldPlayerMove && controller.isGrounded && Input.GetButtonDown("Jump"))
             moveVelocity.y = jumpSpeed;
         else // Keep old y velocity
             moveVelocity.y = moveVelocityY;
@@ -77,8 +75,7 @@ public class PlayerMovement : PlayerComponent
         if (controllerWasGrounded && !controller.isGrounded && moveVelocity.y < 0)
             moveVelocity.y = 0;
 
-        // Only allow looking when cursor is hidden
-        if (!manager.Get<CursorManager>().IsCursorVisable)
+        if (manager.Get<PhaseManager>().ShouldPlayerMove)
         {
             rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);

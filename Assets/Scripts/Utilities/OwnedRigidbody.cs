@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,7 +26,7 @@ public class OwnedRigidbody : MonoBehaviour
         rigidbody.drag = drag;
         rigidbody.angularDrag = angularDrag;
         rigidbody.useGravity = useGravity;
-        rigidbody.isKinematic = false;
+        rigidbody.isKinematic = false; // Rigidbody is enabled by default
         rigidbody.interpolation = interpolate;
         rigidbody.collisionDetectionMode = collisionDetection;
 
