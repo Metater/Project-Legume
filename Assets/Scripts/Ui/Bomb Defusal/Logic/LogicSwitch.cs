@@ -4,28 +4,21 @@ using UnityEngine.UI;
 
 public class LogicSwitch : LogicOutput, IPointerDownHandler
 {
+    [SerializeField] private SyncedBool syncedBool;
     [SerializeField] private Image image;
-    private bool isPowered = false;
 
-    private void Start()
+    private void Update()
     {
-        UpdateVisual();
-    }
-
-    private void UpdateVisual()
-    {
-        image.color = isPowered ? LogicConstants.PoweredColor : LogicConstants.UnpoweredColor;
+        image.color = syncedBool.Value ? LogicConstants.PoweredColor : LogicConstants.UnpoweredColor;
     }
 
     protected override bool GetOutput()
     {
-        return isPowered;
+        return syncedBool.Value;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        isPowered = !isPowered;
-
-        UpdateVisual();
+        syncedBool.CmdSetValue(!syncedBool.Value);
     }
 }

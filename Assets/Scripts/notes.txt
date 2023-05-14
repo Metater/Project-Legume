@@ -3,8 +3,6 @@ Group any related things in your code
 Don't prematurely optimise, be dumb
 
 // Todo
-Opens up ui panel
-
 Logic puzzle, and, or, multiple lights, some good some bad, they are outputs,
 
 
