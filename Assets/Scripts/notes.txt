@@ -25,6 +25,8 @@ Logic puzzle, and, or, multiple lights, some good some bad, they are outputs,
 
 
 // Ideas
+dad: countdown when inputs are wrong, wait to explode??? or too easy
+
 Car, garage, mail box, sewer electrical box, trashcan. Dumpster
 
 Fingerprint brushing the b, compare with samples from suspects, figure out bombers

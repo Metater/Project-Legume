@@ -37,7 +37,7 @@ public class ObjectInteractable : Interactable
                     interactor = null;
                     lastError = float.NaN;
 
-                    player.Get<PlayerInteraction>().RpcCancelInteraction(netIdentity);
+                    player.Get<PlayerInteraction>().TargetCancelInteraction(netIdentity);
                 }
                 else
                 {
@@ -61,7 +61,7 @@ public class ObjectInteractable : Interactable
         if (interactor == null)
         {
             interactor = (player, interactionDistance, interactionPointOffset);
-            player.Get<PlayerInteraction>().RpcAcceptInteraction(netIdentity, InteractionType.Click);
+            player.Get<PlayerInteraction>().TargetAcceptInteraction(netIdentity, InteractionType.Click);
         }
     }
     [Server]

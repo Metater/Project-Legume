@@ -31,7 +31,7 @@ public class DoorInteractable : Interactable
                 {
                     interactor = null;
 
-                    player.Get<PlayerInteraction>().RpcCancelInteraction(netIdentity);
+                    player.Get<PlayerInteraction>().TargetCancelInteraction(netIdentity);
                 }
                 else
                 {
@@ -51,7 +51,7 @@ public class DoorInteractable : Interactable
         if (interactor == null)
         {
             interactor = (player, interactionDistance, interactionPointOffset);
-            player.Get<PlayerInteraction>().RpcAcceptInteraction(netIdentity, InteractionType.Click);
+            player.Get<PlayerInteraction>().TargetAcceptInteraction(netIdentity, InteractionType.Click);
         }
     }
     [Server]

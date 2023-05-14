@@ -124,7 +124,7 @@ public class PlayerInteraction : PlayerComponent
     }
 
     [TargetRpc]
-    public void RpcAcceptInteraction(NetworkIdentity interactableNetIdentity, InteractionType interactionType)
+    public void TargetAcceptInteraction(NetworkIdentity interactableNetIdentity, InteractionType interactionType)
     {
         if (!interactableNetIdentity.TryGetComponent(out Interactable interactable))
         {
@@ -135,7 +135,7 @@ public class PlayerInteraction : PlayerComponent
         targetInteractionType = interactionType;
     }
     [TargetRpc]
-    public void RpcCancelInteraction(NetworkIdentity interactableNetIdentity)
+    public void TargetCancelInteraction(NetworkIdentity interactableNetIdentity)
     {
         if (!interactableNetIdentity.TryGetComponent(out Interactable interactable))
         {

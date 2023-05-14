@@ -162,7 +162,7 @@ public class PlayerInventory : PlayerComponent
         if (item.ServerPickup(player))
         {
             SelectedItem = item;
-            RpcPickupItem(item.netIdentity, selectedSlot);
+            TargetPickupItem(item.netIdentity, selectedSlot);
         }
     }
     [Command]
@@ -177,7 +177,7 @@ public class PlayerInventory : PlayerComponent
         if (item.ServerDrop(player))
         {
             SelectedItem = null;
-            RpcDropItem(item.netIdentity, selectedSlot);
+            TargetDropItem(item.netIdentity, selectedSlot);
         }
     }
     [Command]
@@ -192,7 +192,7 @@ public class PlayerInventory : PlayerComponent
     }
 
     [TargetRpc]
-    private void RpcPickupItem(NetworkIdentity itemNetIdentity, int slot)
+    private void TargetPickupItem(NetworkIdentity itemNetIdentity, int slot)
     {
         if (!itemNetIdentity.TryGetComponent(out Item item))
         {
@@ -203,7 +203,7 @@ public class PlayerInventory : PlayerComponent
         slots[slot] = item;
     }
     [TargetRpc]
-    private void RpcDropItem(NetworkIdentity itemNetIdentity, int slot)
+    private void TargetDropItem(NetworkIdentity itemNetIdentity, int slot)
     {
         if (!itemNetIdentity.TryGetComponent(out Item item))
         {

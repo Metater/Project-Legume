@@ -15,8 +15,8 @@ public class BombInteractable : Interactable
     [Server]
     public override void ServerEKeyDown(Player player)
     {
-        player.Get<PlayerInteraction>().RpcAcceptInteraction(netIdentity, InteractionType.EKey);
-        RpcOpenUi(player.connectionToClient);
+        player.Get<PlayerInteraction>().TargetAcceptInteraction(netIdentity, InteractionType.EKey);
+        TargetOpenUi(player.connectionToClient);
     }
     public override void ServerCancelInteraction(Player player)
     {
@@ -24,7 +24,7 @@ public class BombInteractable : Interactable
     }
 
     [TargetRpc]
-    private void RpcOpenUi(NetworkConnectionToClient _)
+    private void TargetOpenUi(NetworkConnectionToClient _)
     {
         panel.Open();
     }
